@@ -11,8 +11,7 @@ registerServiceWorker();
 // The application will create a renderer using WebGL, if possible,
 // with a fallback to a canvas render. It will also setup the ticker
 // and the root stage PIXI.Container.
-var app = new PIXI.Application();
-
+var app = new PIXI.Application(600, 800, {backgroundColor: 0x1099bb});
 // The application will create a canvas element for you that you
 // can then insert into the DOM.
 document.body.appendChild(app.view);
@@ -23,50 +22,12 @@ PIXI.loader
 .add('catalanian', './images/catalanian.png')
 .add('police', './images/police.png')
 .load(function(loader, resources) {
-    let scene = new Scene(app.stage, resources);
+    let scene = new Scene(app, resources);
     scene.move();
-
-
-
-    // // This creates a texture from a 'bunny.png' image.
-    // var catalanian = new PIXI.Sprite(resources.catalanian.texture);
-    //
-    // // Setup the position of the bunny
-    // catalanian.x = app.renderer.width / 2;
-    // catalanian.y = 0;
-    //
-    // // Rotate around the center
-    // catalanian.anchor.x = 0.5;
-    // catalanian.anchor.y = 0.5;
-    // catalanian.interactive = true;
-    // catalanian.buttonMode = true;
-    // catalanian.on('pointerdown', onMouseDown);
-    //
-    //
-    // // Add the bunny to the scene we are building.
-    // app.stage.addChild(catalanian);
-
-    //
-    //
-    // police.x = app.renderer.width / 3;
-    // police.y = 0;
-    //
-    //  // Rotate around the center
-    // police.anchor.x = 0.5;
-    // police.anchor.y = 0.5;
 
 
     // Listen for frame updates
     app.ticker.add(function() {
-         // each frame we spin the bunny around a bit
-        // police.y += 1;
-        // drawableCatalanians.forEach(man => {
-        //     man.y += 1;
-        // })
         scene.move();
     });
 });
-
-function onMouseDown() {
-
-}
