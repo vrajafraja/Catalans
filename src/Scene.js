@@ -1,4 +1,5 @@
 const PIXI = require('pixi.js');
+const HOWL = require('howler');
 const ACTIVE = 1;
 const DELETED = 0;
 
@@ -138,6 +139,11 @@ class Scene {
     }
 
     onMouseDown() {
+        let sound = new HOWL.Howl({
+            src: ['sounds/Slap.mp3']
+        });
+
+        sound.play();
         this.catalanian.state = DELETED;
         score.text = ++scoreCounter;
     }
