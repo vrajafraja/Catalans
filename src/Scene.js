@@ -1,6 +1,7 @@
 const PIXI = require('pixi.js');
 const ACTIVE = 1;
 const DELETED = 0;
+
 const BreakException = (message) => {
         this.message = message;
         this.name = 'BreakException';
@@ -61,6 +62,24 @@ class Scene {
         this.app.stage.addChild(score);
     }
 
+    _reset(){
+
+        this.objects.forEach(object => {
+            console.log(object);
+            object.sprite.destroy();
+        });
+
+        this.objects = [];
+        this.iteration = 0;
+        this.generateInterval = 200;
+        this.generateDensity = 0.1;
+        score.text = 0;
+        scoreCounter = 0;
+
+
+        this.app.ticker.add(this.moveFunction);
+    }
+
     _applyRules() {
         if (this.iteration % this.generateInterval === 0) {
             this._generate();
@@ -87,9 +106,6 @@ class Scene {
         } catch (e) {
             this.stopCallback();
         }
-        ;
-
-
         console.log(this.iteration++);
     }
 
@@ -127,12 +143,27 @@ class Scene {
     }
 
     showFinalScore() {
+        let resetButton = new PIXI.Sprite(this.resources.reset.texture);
         let finalScore = new PIXI.Text(scoreCounter);
         let finalScoreText = new PIXI.Text("Catalans denied!!!");
+
+        resetButton = this._formatSprite(resetButton);
+        resetButton.x = 300;
+        resetButton.y = 300;
+        resetButton.on('pointerdown', () =>
+        {
+            resetButton.destroy();
+            finalScore.destroy();
+            finalScoreText.destroy();
+            this._reset()
+        });
+
         finalScore.x = 300;
-        finalScore.y = 400;
+        finalScore.y = 600;
         finalScoreText.x = 200;
-        finalScoreText.y = 450;
+        finalScoreText.y = 650;
+
+        this.app.stage.addChild(resetButton);
         this.app.stage.addChild(finalScore);
         this.app.stage.addChild(finalScoreText);
     }

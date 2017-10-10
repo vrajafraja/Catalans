@@ -20,6 +20,7 @@ document.body.appendChild(app.view);
 
 // load the texture we need
 PIXI.loader
+    .add('reset', './images/reset.png')
     .add('catalanian', './images/catalanian.png')
     .add('police', './images/police.png')
     .load(function (loader, resources) {
@@ -28,7 +29,7 @@ PIXI.loader
         let moveFunction = () => {
             scene.move();
         };
-
+        scene.moveFunction = moveFunction;
         scene.stopCallback = () => {
             app.ticker.remove(moveFunction);
             scene.showFinalScore();
