@@ -2,6 +2,7 @@ import './index.css';
 import registerServiceWorker from './registerServiceWorker';
 
 import Scene from './Scene';
+
 const PIXI = require('pixi.js');
 
 
@@ -19,15 +20,21 @@ document.body.appendChild(app.view);
 
 // load the texture we need
 PIXI.loader
-.add('catalanian', './images/catalanian.png')
-.add('police', './images/police.png')
-.load(function(loader, resources) {
-    let scene = new Scene(app, resources);
-    scene.move();
+    .add('catalanian', './images/catalanian.png')
+    .add('police', './images/police.png')
+    .load(function (loader, resources) {
+        let scene = new Scene(app, resources);
 
+        let moveFunction = () => {
+            scene.move();
+        };
 
-    // Listen for frame updates
-    app.ticker.add(function() {
-        scene.move();
+        scene.stopCallback = () => {
+            app.ticker.remove(moveFunction);
+            scene.showFinalScore();
+        };
+
+        moveFunction();
+        // Listen for frame updates
+        app.ticker.add(moveFunction);
     });
-});

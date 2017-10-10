@@ -1,6 +1,11 @@
 const PIXI = require('pixi.js');
 const ACTIVE = 1;
 const DELETED = 0;
+const BreakException = (message) => {
+        this.message = message;
+        this.name = 'BreakException';
+    }
+;
 let score;
 let scoreCounter = 0;
 
@@ -19,15 +24,20 @@ class SceneObject {
 
 class Catalanian extends SceneObject {
     constructor(positionX, sprite) {
-        super(positionX, Math.random() * 2 + 0.1);
+        super(positionX, Math.random() * 20 + 0.1);
         this.sprite = sprite;
     }
 
     move() {
         if (this.state === ACTIVE) {
-            this.positionY += this.velocity;
-            let y = this.sprite.y;
-            this.sprite.y = this.velocity + y;
+            if (this.positionY < 800) {
+                this.positionY += this.velocity;
+                let y = this.sprite.y;
+                this.sprite.y = this.velocity + y;
+            }
+            else {
+                throw new BreakException('Catalanian hit the ground.');
+            }
         }
         else {
             this.sprite.destroy();
@@ -51,14 +61,7 @@ class Scene {
         this.app.stage.addChild(score);
     }
 
-    move() {
-        this.objects.forEach(object => {
-            object.move();
-            if (object.state === DELETED) {
-                this.objects.splice(this.objects.indexOf(object), 1);
-            }
-        });
-
+    _applyRules() {
         if (this.iteration % this.generateInterval === 0) {
             this._generate();
         }
@@ -70,7 +73,32 @@ class Scene {
         if (this.iteration % 2000 === 0) {
             this.generateInterval -= Math.floor(this.generateInterval / 10);
         }
+    }
+
+    move() {
+        try {
+            this.objects.forEach(object => {
+                object.move();
+                if (object.state === DELETED) {
+                    this.objects.splice(this.objects.indexOf(object), 1);
+                }
+            });
+            this._applyRules();
+        } catch (e) {
+            this.stopCallback();
+        }
+        ;
+
+
         console.log(this.iteration++);
+    }
+
+    _formatSprite(sprite) {
+        sprite.anchor.x = 0.5;
+        sprite.anchor.y = 0.5;
+        sprite.interactive = true;
+        sprite.buttonMode = true;
+        return sprite;
     }
 
     _generate() {
@@ -80,10 +108,7 @@ class Scene {
             let rand = Math.random();
             if (rand >= (1 - this.generateDensity)) {
                 let drawableCatalanian = new PIXI.Sprite(this.resources.catalanian.texture);
-                drawableCatalanian.anchor.x = 0.5;
-                drawableCatalanian.anchor.y = 0.5;
-                drawableCatalanian.interactive = true;
-                drawableCatalanian.buttonMode = true;
+                drawableCatalanian = this._formatSprite(drawableCatalanian);
                 drawableCatalanian.x = i * offset + 50;
 
                 let catalanian = new Catalanian(i * offset + 50, drawableCatalanian);
@@ -99,6 +124,17 @@ class Scene {
     onMouseDown() {
         this.catalanian.state = DELETED;
         score.text = ++scoreCounter;
+    }
+
+    showFinalScore() {
+        let finalScore = new PIXI.Text(scoreCounter);
+        let finalScoreText = new PIXI.Text("Catalans denied!!!");
+        finalScore.x = 300;
+        finalScore.y = 400;
+        finalScoreText.x = 200;
+        finalScoreText.y = 450;
+        this.app.stage.addChild(finalScore);
+        this.app.stage.addChild(finalScoreText);
     }
 }
 
