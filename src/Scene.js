@@ -45,14 +45,20 @@ const BreakException = (message) => {
 };
 
 let totalClicks = 1;
-let totalHits = 1;
+let totalHits = 0;
 let score;
 let scoreCounter = 0;
 let iteration = 0;
 
 
-let sound = new HOWL.Howl({
+const slapSound = new HOWL.Howl({
     src: ['sounds/Slap.mp3']
+});
+
+const backgroundSound = new HOWL.Howl({
+    src: ['sounds/Slap.mp3'],
+    volume: 0.5,
+    loop: true
 });
 
 
@@ -62,6 +68,7 @@ class SceneObject {
         this.positionY = 0;
         this.velocity = velocity;
         this.state = ACTIVE;
+
     }
 
     move() {
@@ -70,11 +77,12 @@ class SceneObject {
 }
 
 class Catalanian extends SceneObject {
-    constructor(positionX, sprite, resources) {
-        super(positionX, Math.random() * 10 + 0.1);
+    constructor(positionX, speed, sprite, resources) {
+        super(positionX, speed);
         this.sprite = sprite;
         this.textureResources = resources;
         this.animation = "RH";
+        this._animate();
     }
 
     _animate() {
@@ -114,7 +122,7 @@ class Catalanian extends SceneObject {
         if (this.state === ACTIVE) {
             scoreCounter += Math.ceil(this.velocity);
             score.text = scoreCounter;
-            sound.play();
+            slapSound.play();
             this.kill();
             totalHits++;
         }
@@ -127,6 +135,17 @@ class Catalanian extends SceneObject {
         this.state = DEAD;
         this.sprite.setTexture(this.textureResources.deadCatalanian.texture);
         this.sprite.alpha = .5;
+    }
+}
+
+class CatalanianInCar extends Catalanian {
+    constructor(positionX, speed, sprite, resources) {
+        super(positionX, speed, sprite, resources);
+        this.animation = "car";
+        this._animate();
+    }
+    _animate(){
+        this.sprite.texture = this.textureResources.car.texture;
     }
 }
 
@@ -149,6 +168,8 @@ class Scene {
         background.on('pointerdown', () => totalClicks++);
         this.app.stage.addChild(background);
         this.app.stage.addChild(score);
+
+        backgroundSound.play();
     }
 
     _reset() {
@@ -161,10 +182,11 @@ class Scene {
         this.generateInterval = 150;
         this.generateDensity = 0.1;
         totalHits = 0;
-        totalClicks = 0;
+        totalClicks = 1;
         score.text = 0;
         scoreCounter = 0;
 
+        backgroundSound.play();
         this.app.ticker.add(this.moveFunction);
     }
 
@@ -222,11 +244,12 @@ class Scene {
         for (let i = 0; i < 7; i++) {
             let rand = Math.random();
             if (rand >= (1 - this.generateDensity)) {
-                let drawableCatalanian = new PIXI.Sprite(this.resources.catalanianRH.texture);
+                let speed = Math.random() * 10 + 0.1;
+                let drawableCatalanian = new PIXI.Sprite();
                 drawableCatalanian = this._formatSprite(drawableCatalanian);
                 drawableCatalanian.x = i * offset + Math.sin(iteration) * 50 + 90;
 
-                let catalanian = new Catalanian(i * offset + 50, drawableCatalanian, this.resources);
+                let catalanian = speed > 5 ? new CatalanianInCar(i * offset + 50, speed, drawableCatalanian, this.resources) : new Catalanian(i * offset + 50, speed, drawableCatalanian, this.resources);
                 drawableCatalanian.on('pointerdown', this.onMouseDown);
                 drawableCatalanian.catalanian = catalanian;
 
@@ -247,7 +270,7 @@ class Scene {
         let finalScore = new PIXI.Text(scoreCounter, scoreTextStyle);
         let finalScoreText = new PIXI.Text("Catalans denied!!!", scoreTextStyle);
 
-        let accuracy = new PIXI.Text("Accuracy: " + Math.ceil(totalHits / totalClicks * 100)  + "%", accuracyStyle);
+        let accuracy = new PIXI.Text("Accuracy: " + Math.ceil(totalHits / totalClicks * 100) + "%", accuracyStyle);
 
         resetButton = this._formatSprite(resetButton);
         resetButton.x = 300;
@@ -274,6 +297,8 @@ class Scene {
         this.app.stage.addChild(finalScore);
         this.app.stage.addChild(finalScoreText);
         this.app.stage.addChild(accuracy);
+
+        backgroundSound.stop();
     }
 }
 
