@@ -59,8 +59,12 @@ const slapSound = new HOWL.Howl({
     src: ['sounds/Slap.mp3']
 });
 
+const carCrashSound = new HOWL.Howl({
+    src: ['sounds/CarCrash.mp3']
+});
+
 const backgroundSound = new HOWL.Howl({
-    src: ['sounds/Slap.mp3'],
+    src: ['sounds/Vejvar.mp3'],
     volume: 0.5,
     loop: true
 });
@@ -126,11 +130,15 @@ class Catalanian extends SceneObject {
         }
     }
 
+    _playSound(){
+        slapSound.play();
+    }
+
     click() {
         if (this.state === ACTIVE) {
             scoreCounter += Math.ceil(this.velocity);
             score.text = scoreCounter;
-            slapSound.play();
+            this._playSound();
             this.kill();
             totalHits++;
         }
@@ -155,6 +163,10 @@ class CatalanianInCar extends Catalanian {
     _animate(){
         this.sprite.texture = this.textureResources.car.texture;
     }
+    _playSound(){
+        carCrashSound.play();
+    }
+
 }
 
 class Scene {
