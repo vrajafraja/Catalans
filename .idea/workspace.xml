@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="f8b0c89a-7e5f-40ca-a38b-f77732cbedaf" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Scene.js" afterPath="$PROJECT_DIR$/src/Scene.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/index.js" afterPath="$PROJECT_DIR$/src/index.js" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -19,8 +20,8 @@
       <file leaf-file-name="index.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/index.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="14" column="39" lean-forward="false" selection-start-line="14" selection-start-column="39" selection-end-line="14" selection-end-column="39" />
+            <state relative-caret-position="595">
+              <caret line="35" column="46" lean-forward="true" selection-start-line="35" selection-start-column="46" selection-end-line="35" selection-end-column="46" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -31,8 +32,8 @@
       <file leaf-file-name="Scene.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Scene.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="650">
-              <caret line="208" column="7" lean-forward="false" selection-start-line="208" selection-start-column="7" selection-end-line="208" selection-end-column="7" />
+            <state relative-caret-position="765">
+              <caret line="66" column="13" lean-forward="false" selection-start-line="66" selection-start-column="13" selection-end-line="66" selection-end-column="13" />
               <folding />
             </state>
           </provider>
@@ -54,11 +55,12 @@
       <find>aliveSprite</find>
       <find>if</find>
       <find>iteration</find>
-      <find>reset</find>
       <find>scene</find>
       <find>totalClicks</find>
       <find>alpha</find>
+      <find>reset</find>
       <find>showFinalScore</find>
+      <find>animate</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -87,8 +89,8 @@
     <handled-path value="$PROJECT_DIR$/node_modules" />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1251" />
-    <option name="y" value="251" />
+    <option name="x" value="1236" />
+    <option name="y" value="315" />
     <option name="width" value="2130" />
     <option name="height" value="1447" />
   </component>
@@ -169,15 +171,15 @@
       <workItem from="1507648639144" duration="6116000" />
       <workItem from="1507669968855" duration="1521000" />
       <workItem from="1507703237942" duration="3563000" />
-      <workItem from="1507707541524" duration="22852000" />
+      <workItem from="1507707541524" duration="24950000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="55012000" />
+    <option name="totallyTimeSpent" value="57110000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1251" y="251" width="2130" height="1447" extended-state="0" />
+    <frame x="1236" y="315" width="2130" height="1447" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17017208" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -407,8 +409,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/index.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="14" column="39" lean-forward="false" selection-start-line="14" selection-start-column="39" selection-end-line="14" selection-end-column="39" />
+        <state relative-caret-position="595">
+          <caret line="35" column="46" lean-forward="true" selection-start-line="35" selection-start-column="46" selection-end-line="35" selection-end-column="46" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
@@ -417,8 +419,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Scene.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="650">
-          <caret line="208" column="7" lean-forward="false" selection-start-line="208" selection-start-column="7" selection-end-line="208" selection-end-column="7" />
+        <state relative-caret-position="765">
+          <caret line="66" column="13" lean-forward="false" selection-start-line="66" selection-start-column="13" selection-end-line="66" selection-end-column="13" />
           <folding />
         </state>
       </provider>

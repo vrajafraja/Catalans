@@ -28,6 +28,8 @@ PIXI.loader
     .add('catalanianRH', './images/catalanianRH.png')
     .add('catalanianLH', './images/catalanianLH.png')
     .add('car', './images/car.png')
+    .add('deadCar1', './images/deadCar1.png')
+    .add('deadCar2', './images/deadCar2.png')
     .add('deadCatalanian', './images/deadCatalanian.png')
     .add('police', './images/police.png')
     .load(function (loader, resources) {

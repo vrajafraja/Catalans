@@ -46,7 +46,6 @@ const BreakException = (message) => {
 };
 
 
-
 let speedQuotient = 9;
 let totalClicks = 0;
 let totalHits = 0;
@@ -65,7 +64,7 @@ const carCrashSound = new HOWL.Howl({
 
 const backgroundSound = new HOWL.Howl({
     src: ['sounds/Vejvar.mp3'],
-    volume: 0.5,
+    volume: 5.0,
     loop: true
 });
 
@@ -120,8 +119,7 @@ class Catalanian extends SceneObject {
             if (this.sprite.alpha > 0) {
                 this.sprite.alpha -= 0.001;
             }
-            else
-            {
+            else {
                 this.state = DELETED;
             }
         }
@@ -130,7 +128,7 @@ class Catalanian extends SceneObject {
         }
     }
 
-    _playSound(){
+    _playSound() {
         slapSound.play();
     }
 
@@ -157,14 +155,66 @@ class Catalanian extends SceneObject {
 class CatalanianInCar extends Catalanian {
     constructor(positionX, speed, sprite, resources) {
         super(positionX, speed, sprite, resources);
-        this.animation = "car";
+        this.animation = "deadCar1";
         this._animate();
     }
-    _animate(){
-        this.sprite.texture = this.textureResources.car.texture;
+
+    _animate() {
+        if (iteration % 10 === 0){
+            if (this.state === DEAD){
+                if (this.animation === "deadCar1") {
+                    this.animation = "deadCar2";
+                    this.sprite.texture = this.textureResources.deadCar2.texture;
+                    console.log("dead2");
+                }
+                else {
+                    this.animation = "deadCar1";
+                    this.sprite.texture = this.textureResources.deadCar1.texture;
+                    console.log("dead1");
+                }
+            }
+            else {
+                this.sprite.texture = this.textureResources.car.texture;
+            }
+        }
+
     }
-    _playSound(){
+
+    move() {
+        if (this.state === ACTIVE) {
+            if (this.positionY < 800) {
+                this.positionY += this.velocity;
+                let y = this.sprite.y;
+                this.sprite.y = this.velocity + y;
+                this._animate();
+            }
+            else {
+                throw new BreakException('Catalanian hit the ground.');
+            }
+        }
+        else if (this.state === DEAD) {
+            if (this.sprite.alpha > 0) {
+                this.sprite.alpha -= 0.001;
+                this._animate();
+            }
+            else {
+                this.state = DELETED;
+            }
+        }
+        else {
+            this.sprite.destroy();
+        }
+    }
+
+    _playSound() {
         carCrashSound.play();
+    }
+
+    kill() {
+        this.sprite.interactive = false;
+        this.state = DEAD;
+        this.sprite.setTexture(this.textureResources.deadCar1.texture);
+        this.sprite.alpha = .5;
     }
 
 }
@@ -293,7 +343,6 @@ class Scene {
         let accuracy = new PIXI.Text(accuracyStyle);
 
 
-
         resetButton = this._formatSprite(resetButton);
         resetButton.x = 300;
         resetButton.y = 300;
@@ -317,8 +366,8 @@ class Scene {
         this.app.stage.addChild(finalScore);
         this.app.stage.addChild(finalScoreText);
 
-        if (totalHits + totalClicks > 0){
-            accuracy= new PIXI.Text("Accuracy: " + Math.ceil(totalHits / totalClicks * 100) + "%", accuracyStyle);
+        if (totalHits + totalClicks > 0) {
+            accuracy = new PIXI.Text("Accuracy: " + Math.ceil(totalHits / totalClicks * 100) + "%", accuracyStyle);
             accuracy.x = 300;
             accuracy.y = 680;
             accuracy.anchor.x = 0.5;
