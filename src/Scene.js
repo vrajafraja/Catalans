@@ -44,6 +44,9 @@ const BreakException = (message) => {
     this.name = 'BreakException';
 };
 
+
+
+let speedQuotient = 9;
 let totalClicks = 1;
 let totalHits = 0;
 let score;
@@ -197,6 +200,7 @@ class Scene {
 
         if (iteration % 100 === 0) {
             this.generateDensity += 0.01;
+            speedQuotient += 0.05;
         }
 
         if (iteration % 2000 === 0) {
@@ -244,7 +248,7 @@ class Scene {
         for (let i = 0; i < 7; i++) {
             let rand = Math.random();
             if (rand >= (1 - this.generateDensity)) {
-                let speed = Math.random() * 10 + 0.1;
+                let speed = Math.random() * speedQuotient + 0.1;
                 let drawableCatalanian = new PIXI.Sprite();
                 drawableCatalanian = this._formatSprite(drawableCatalanian);
                 drawableCatalanian.x = i * offset + Math.sin(iteration) * 50 + 90;
