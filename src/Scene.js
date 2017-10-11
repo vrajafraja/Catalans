@@ -165,12 +165,10 @@ class CatalanianInCar extends Catalanian {
                 if (this.animation === "deadCar1") {
                     this.animation = "deadCar2";
                     this.sprite.texture = this.textureResources.deadCar2.texture;
-                    console.log("dead2");
                 }
                 else {
                     this.animation = "deadCar1";
                     this.sprite.texture = this.textureResources.deadCar1.texture;
-                    console.log("dead1");
                 }
             }
             else {
