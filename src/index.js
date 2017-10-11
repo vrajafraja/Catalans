@@ -21,14 +21,17 @@ document.body.appendChild(app.view);
 // load the texture we need
 PIXI.loader
     .add('reset', './images/reset.png')
+    .add('background', './images/background.png')
     .add('catalanian', './images/catalanian.png')
+    .add('catalanianRH', './images/catalanianRH.png')
+    .add('catalanianLH', './images/catalanianLH.png')
+    .add('deadCatalanian', './images/deadCatalanian.png')
     .add('police', './images/police.png')
     .load(function (loader, resources) {
         let scene = new Scene(app, resources);
 
-        let moveFunction = () => {
-            scene.move();
-        };
+        let moveFunction = scene.move.bind(scene);
+
         scene.moveFunction = moveFunction;
         scene.stopCallback = () => {
             app.ticker.remove(moveFunction);

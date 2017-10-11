@@ -2,14 +2,59 @@ const PIXI = require('pixi.js');
 const HOWL = require('howler');
 const ACTIVE = 1;
 const DELETED = 0;
+const DEAD = -1;
+
+
+const scoreTextStyle = new PIXI.TextStyle({
+    fontFamily: 'Arial',
+    fontSize: 36,
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+    fill: ['#fffd00', '#ff000c'], // gradient
+    stroke: '#000000',
+    strokeThickness: 5,
+    dropShadow: true,
+    dropShadowColor: '#FFFFFF',
+    dropShadowBlur: 4,
+    dropShadowAngle: Math.PI / 6,
+    dropShadowDistance: 6,
+    wordWrap: true,
+    wordWrapWidth: 440
+});
+
+const accuracyStyle = new PIXI.TextStyle({
+    fontFamily: 'Arial',
+    fontSize: 20,
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+    fill: ['#fffd00', '#ff000c'], // gradient
+    stroke: '#000000',
+    strokeThickness: 5,
+    dropShadow: true,
+    dropShadowColor: '#FFFFFF',
+    dropShadowBlur: 4,
+    dropShadowAngle: Math.PI / 6,
+    dropShadowDistance: 6,
+    wordWrap: true,
+    wordWrapWidth: 440
+});
 
 const BreakException = (message) => {
-        this.message = message;
-        this.name = 'BreakException';
-    }
-;
+    this.message = message;
+    this.name = 'BreakException';
+};
+
+let totalClicks = 1;
+let totalHits = 1;
 let score;
 let scoreCounter = 0;
+let iteration = 0;
+
+
+let sound = new HOWL.Howl({
+    src: ['sounds/Slap.mp3']
+});
+
 
 class SceneObject {
     constructor(positionX, velocity) {
@@ -25,9 +70,24 @@ class SceneObject {
 }
 
 class Catalanian extends SceneObject {
-    constructor(positionX, sprite) {
-        super(positionX, Math.random() * 20 + 0.1);
+    constructor(positionX, sprite, resources) {
+        super(positionX, Math.random() * 10 + 0.1);
         this.sprite = sprite;
+        this.textureResources = resources;
+        this.animation = "RH";
+    }
+
+    _animate() {
+        if (iteration % (25 - Math.ceil(this.velocity)) === 0) {
+            if (this.animation === "RH") {
+                this.animation = "LH";
+                this.sprite.setTexture(this.textureResources.catalanianLH.texture);
+            }
+            else {
+                this.animation = "RH";
+                this.sprite.setTexture(this.textureResources.catalanianRH.texture);
+            }
+        }
     }
 
     move() {
@@ -36,63 +96,100 @@ class Catalanian extends SceneObject {
                 this.positionY += this.velocity;
                 let y = this.sprite.y;
                 this.sprite.y = this.velocity + y;
+                this._animate();
             }
             else {
                 throw new BreakException('Catalanian hit the ground.');
             }
         }
+        else if (this.state === DEAD) {
+            this.sprite.alpha = this.sprite.alpha > 0 ? this.sprite.alpha - 0.001 : 0;
+        }
         else {
             this.sprite.destroy();
         }
+    }
+
+    click() {
+        if (this.state === ACTIVE) {
+            scoreCounter += Math.ceil(this.velocity);
+            score.text = scoreCounter;
+            sound.play();
+            this.kill();
+            totalHits++;
+        }
+        totalClicks++;
+    }
+
+    kill() {
+        //debugger;
+        this.sprite.interactive = false;
+        this.state = DEAD;
+        this.sprite.setTexture(this.textureResources.deadCatalanian.texture);
+        this.sprite.alpha = .5;
     }
 }
 
 class Scene {
     constructor(app, resources) {
         this.objects = [];
-        this.iteration = 0;
+
         this.app = app;
         this.resources = resources;
         this.generateInterval = 200;
         this.generateDensity = 0.1;
 
-        score = new PIXI.Text(0);
+        score = new PIXI.Text(0, scoreTextStyle);
         score.x = 30;
         score.y = 30;
 
+        let background = new PIXI.Sprite(resources.background.texture);
+        background.interactive = true;
+
+        background.on('pointerdown', () => totalClicks++);
+        this.app.stage.addChild(background);
         this.app.stage.addChild(score);
     }
 
-    _reset(){
-
+    _reset() {
         this.objects.forEach(object => {
-            console.log(object);
             object.sprite.destroy();
         });
 
         this.objects = [];
-        this.iteration = 0;
-        this.generateInterval = 200;
+        iteration = 0;
+        this.generateInterval = 150;
         this.generateDensity = 0.1;
+        totalHits = 0;
+        totalClicks = 0;
         score.text = 0;
         scoreCounter = 0;
-
 
         this.app.ticker.add(this.moveFunction);
     }
 
     _applyRules() {
-        if (this.iteration % this.generateInterval === 0) {
+        if ((iteration % this.generateInterval === 0) || this._nobodyAlive()) {
             this._generate();
         }
 
-        if (this.iteration % 100 === 0) {
+        if (iteration % 100 === 0) {
             this.generateDensity += 0.01;
         }
 
-        if (this.iteration % 2000 === 0) {
+        if (iteration % 2000 === 0) {
             this.generateInterval -= Math.floor(this.generateInterval / 10);
         }
+    }
+
+    _nobodyAlive() {
+        let allDead = true;
+        this.objects.forEach(object => {
+            if (object.state === ACTIVE) {
+                allDead = false;
+            }
+        });
+        return allDead;
     }
 
     move() {
@@ -107,7 +204,8 @@ class Scene {
         } catch (e) {
             this.stopCallback();
         }
-        console.log(this.iteration++);
+        iteration++;
+        //console.log(iteration);
     }
 
     _formatSprite(sprite) {
@@ -124,11 +222,11 @@ class Scene {
         for (let i = 0; i < 7; i++) {
             let rand = Math.random();
             if (rand >= (1 - this.generateDensity)) {
-                let drawableCatalanian = new PIXI.Sprite(this.resources.catalanian.texture);
+                let drawableCatalanian = new PIXI.Sprite(this.resources.catalanianRH.texture);
                 drawableCatalanian = this._formatSprite(drawableCatalanian);
-                drawableCatalanian.x = i * offset + 50;
+                drawableCatalanian.x = i * offset + Math.sin(iteration) * 50 + 90;
 
-                let catalanian = new Catalanian(i * offset + 50, drawableCatalanian);
+                let catalanian = new Catalanian(i * offset + 50, drawableCatalanian, this.resources);
                 drawableCatalanian.on('pointerdown', this.onMouseDown);
                 drawableCatalanian.catalanian = catalanian;
 
@@ -139,39 +237,43 @@ class Scene {
     }
 
     onMouseDown() {
-        let sound = new HOWL.Howl({
-            src: ['sounds/Slap.mp3']
-        });
-
-        sound.play();
-        this.catalanian.state = DELETED;
-        score.text = ++scoreCounter;
+        this.catalanian.click();
     }
 
     showFinalScore() {
+        this.objects.forEach(object => object.state = DEAD);
+
         let resetButton = new PIXI.Sprite(this.resources.reset.texture);
-        let finalScore = new PIXI.Text(scoreCounter);
-        let finalScoreText = new PIXI.Text("Catalans denied!!!");
+        let finalScore = new PIXI.Text(scoreCounter, scoreTextStyle);
+        let finalScoreText = new PIXI.Text("Catalans denied!!!", scoreTextStyle);
+
+        let accuracy = new PIXI.Text("Accuracy: " + Math.ceil(totalHits / totalClicks * 100)  + "%", accuracyStyle);
 
         resetButton = this._formatSprite(resetButton);
         resetButton.x = 300;
         resetButton.y = 300;
-        resetButton.on('pointerdown', () =>
-        {
+        resetButton.on('pointerdown', () => {
             resetButton.destroy();
             finalScore.destroy();
             finalScoreText.destroy();
+            accuracy.destroy();
             this._reset()
         });
 
         finalScore.x = 300;
         finalScore.y = 600;
-        finalScoreText.x = 200;
+        finalScore.anchor.x = 0.5;
+        finalScoreText.x = 300;
         finalScoreText.y = 650;
+        finalScoreText.anchor.x = 0.5;
+        accuracy.x = 300;
+        accuracy.y = 700;
+        accuracy.anchor.x = 0.5;
 
         this.app.stage.addChild(resetButton);
         this.app.stage.addChild(finalScore);
         this.app.stage.addChild(finalScoreText);
+        this.app.stage.addChild(accuracy);
     }
 }
 
