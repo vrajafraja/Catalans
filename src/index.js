@@ -12,7 +12,7 @@ registerServiceWorker();
 // The application will create a renderer using WebGL, if possible,
 // with a fallback to a canvas render. It will also setup the ticker
 // and the root stage PIXI.Container.
-var app = new PIXI.Application(600, 800, {backgroundColor: 0x1099bb});
+var app = new PIXI.Application(600, 800);
 // The application will create a canvas element for you that you
 // can then insert into the DOM.
 document.body.appendChild(app.view);
@@ -22,6 +22,8 @@ document.body.appendChild(app.view);
 PIXI.loader
     .add('reset', './images/reset.png')
     .add('background', './images/background.png')
+    .add('backgroundTopOffice', './images/backgroundTopOffice.png')
+    .add('line', './images/line.png')
     .add('catalanian', './images/catalanian.png')
     .add('catalanianRH', './images/catalanianRH.png')
     .add('catalanianLH', './images/catalanianLH.png')

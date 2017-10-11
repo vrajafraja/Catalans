@@ -1,5 +1,6 @@
 const PIXI = require('pixi.js');
 const HOWL = require('howler');
+
 const ACTIVE = 1;
 const DELETED = 0;
 const DEAD = -1;
@@ -47,7 +48,7 @@ const BreakException = (message) => {
 
 
 let speedQuotient = 9;
-let totalClicks = 1;
+let totalClicks = 0;
 let totalHits = 0;
 let score;
 let scoreCounter = 0;
@@ -64,14 +65,12 @@ const backgroundSound = new HOWL.Howl({
     loop: true
 });
 
-
 class SceneObject {
     constructor(positionX, velocity) {
         this.positionX = positionX;
         this.positionY = 0;
         this.velocity = velocity;
         this.state = ACTIVE;
-
     }
 
     move() {
@@ -89,7 +88,7 @@ class Catalanian extends SceneObject {
     }
 
     _animate() {
-        if (iteration % (25 - Math.ceil(this.velocity)) === 0) {
+        if (iteration % (20 - Math.ceil(this.velocity)) === 0) {
             if (this.animation === "RH") {
                 this.animation = "LH";
                 this.sprite.setTexture(this.textureResources.catalanianLH.texture);
@@ -114,7 +113,13 @@ class Catalanian extends SceneObject {
             }
         }
         else if (this.state === DEAD) {
-            this.sprite.alpha = this.sprite.alpha > 0 ? this.sprite.alpha - 0.001 : 0;
+            if (this.sprite.alpha > 0) {
+                this.sprite.alpha -= 0.001;
+            }
+            else
+            {
+                this.state = DELETED;
+            }
         }
         else {
             this.sprite.destroy();
@@ -185,7 +190,7 @@ class Scene {
         this.generateInterval = 150;
         this.generateDensity = 0.1;
         totalHits = 0;
-        totalClicks = 1;
+        totalClicks = 0;
         score.text = 0;
         scoreCounter = 0;
 
@@ -273,8 +278,9 @@ class Scene {
         let resetButton = new PIXI.Sprite(this.resources.reset.texture);
         let finalScore = new PIXI.Text(scoreCounter, scoreTextStyle);
         let finalScoreText = new PIXI.Text("Catalans denied!!!", scoreTextStyle);
+        let accuracy = new PIXI.Text(accuracyStyle);
 
-        let accuracy = new PIXI.Text("Accuracy: " + Math.ceil(totalHits / totalClicks * 100) + "%", accuracyStyle);
+
 
         resetButton = this._formatSprite(resetButton);
         resetButton.x = 300;
@@ -288,19 +294,24 @@ class Scene {
         });
 
         finalScore.x = 300;
-        finalScore.y = 600;
+        finalScore.y = 580;
         finalScore.anchor.x = 0.5;
         finalScoreText.x = 300;
-        finalScoreText.y = 650;
+        finalScoreText.y = 630;
         finalScoreText.anchor.x = 0.5;
-        accuracy.x = 300;
-        accuracy.y = 700;
-        accuracy.anchor.x = 0.5;
+
 
         this.app.stage.addChild(resetButton);
         this.app.stage.addChild(finalScore);
         this.app.stage.addChild(finalScoreText);
-        this.app.stage.addChild(accuracy);
+
+        if (totalHits + totalClicks > 0){
+            accuracy= new PIXI.Text("Accuracy: " + Math.ceil(totalHits / totalClicks * 100) + "%", accuracyStyle);
+            accuracy.x = 300;
+            accuracy.y = 680;
+            accuracy.anchor.x = 0.5;
+            this.app.stage.addChild(accuracy);
+        }
 
         backgroundSound.stop();
     }
