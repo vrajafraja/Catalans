@@ -5,13 +5,15 @@ const ACTIVE = 1;
 const DELETED = 0;
 const DEAD = -1;
 
+const HIGH_SCORE_SERVER = "https://catalans.herokuapp.com";
+
 
 const scoreTextStyle = new PIXI.TextStyle({
     fontFamily: 'Arial',
     fontSize: 36,
     fontStyle: 'italic',
     fontWeight: 'bold',
-    fill: ['#fffd00', '#ff000c'], // gradient
+    fill: ['#fffd00', '#ff6102'], // gradient
     stroke: '#000000',
     strokeThickness: 5,
     dropShadow: true,
@@ -25,10 +27,10 @@ const scoreTextStyle = new PIXI.TextStyle({
 
 const accuracyStyle = new PIXI.TextStyle({
     fontFamily: 'Arial',
-    fontSize: 20,
+    fontSize: 26,
     fontStyle: 'italic',
     fontWeight: 'bold',
-    fill: ['#fffd00', '#ff000c'], // gradient
+    fill: ['#fffd00', '#ff6102'], // gradient
     stroke: '#000000',
     strokeThickness: 5,
     dropShadow: true,
@@ -94,11 +96,11 @@ class Catalanian extends SceneObject {
         if (iteration % (20 - Math.ceil(this.velocity)) === 0) {
             if (this.animation === "RH") {
                 this.animation = "LH";
-                this.sprite.setTexture(this.textureResources.catalanianLH.texture);
+                this.sprite.texture = this.textureResources.catalanianLH.texture;
             }
             else {
                 this.animation = "RH";
-                this.sprite.setTexture(this.textureResources.catalanianRH.texture);
+                this.sprite.texture = this.textureResources.catalanianRH.texture;
             }
         }
     }
@@ -147,7 +149,78 @@ class Catalanian extends SceneObject {
         //debugger;
         this.sprite.interactive = false;
         this.state = DEAD;
-        this.sprite.setTexture(this.textureResources.deadCatalanian.texture);
+        this.sprite.texture = this.textureResources.deadCatalanian.texture;
+        this.sprite.alpha = .5;
+    }
+}
+
+class OldCatalanian extends SceneObject {
+    constructor(positionX, speed, sprite, resources) {
+        super(positionX, speed);
+        this.sprite = sprite;
+        this.textureResources = resources;
+        this.animation = "RH";
+        this._animate();
+    }
+
+    _animate() {
+        if (iteration % (25 - Math.ceil(this.velocity)) === 0) {
+            if (this.animation === "RH") {
+                this.animation = "LH";
+                this.sprite.texture = this.textureResources.oldCatalanianLH.texture;
+            }
+            else {
+                this.animation = "RH";
+                this.sprite.texture = this.textureResources.oldCatalanianRH.texture;
+            }
+        }
+    }
+
+    move() {
+        if (this.state === ACTIVE) {
+            if (this.positionY < 800) {
+                this.positionY += this.velocity;
+                let y = this.sprite.y;
+                this.sprite.y = this.velocity + y;
+                this._animate();
+            }
+            else {
+                throw new BreakException('Catalanian hit the ground.');
+            }
+        }
+        else if (this.state === DEAD) {
+            if (this.sprite.alpha > 0) {
+                this.sprite.alpha -= 0.001;
+            }
+            else {
+                this.state = DELETED;
+            }
+        }
+        else {
+            this.sprite.destroy();
+        }
+    }
+
+    _playSound() {
+        slapSound.play();
+    }
+
+    click() {
+        if (this.state === ACTIVE) {
+            scoreCounter += Math.ceil(this.velocity);
+            score.text = scoreCounter;
+            this._playSound();
+            this.kill();
+            totalHits++;
+        }
+        totalClicks++;
+    }
+
+    kill() {
+        //debugger;
+        this.sprite.interactive = false;
+        this.state = DEAD;
+        this.sprite.texture = this.textureResources.deadOldCatalanian.texture;
         this.sprite.alpha = .5;
     }
 }
@@ -211,7 +284,7 @@ class CatalanianInCar extends Catalanian {
     kill() {
         this.sprite.interactive = false;
         this.state = DEAD;
-        this.sprite.setTexture(this.textureResources.deadCar1.texture);
+        this.sprite.texture = this.textureResources.deadCar1.texture;
         this.sprite.alpha = .5;
     }
 
@@ -317,8 +390,18 @@ class Scene {
                 let drawableCatalanian = new PIXI.Sprite();
                 drawableCatalanian = this._formatSprite(drawableCatalanian);
                 drawableCatalanian.x = i * offset + Math.sin(iteration) * 50 + 90;
+                let catalanian;
+                if (speed < 1.5){
+                    catalanian = new OldCatalanian(i * offset + 50, speed, drawableCatalanian, this.resources);
+                }
+                else if (speed < 5)
+                {
+                    catalanian = new Catalanian(i * offset + 50, speed, drawableCatalanian, this.resources);
+                }
+                else {
+                    catalanian = new CatalanianInCar(i * offset + 50, speed, drawableCatalanian, this.resources);
+                }
 
-                let catalanian = speed > 5 ? new CatalanianInCar(i * offset + 50, speed, drawableCatalanian, this.resources) : new Catalanian(i * offset + 50, speed, drawableCatalanian, this.resources);
                 drawableCatalanian.on('pointerdown', this.onMouseDown);
                 drawableCatalanian.catalanian = catalanian;
 
@@ -341,48 +424,43 @@ class Scene {
         let resetButton = new PIXI.Sprite(this.resources.reset.texture);
         resetButton = this._formatSprite(resetButton);
         resetButton.x = 300;
-        resetButton.y = 300;
+        resetButton.y = 250;
         return resetButton;
     }
 
     _createFinalScore() {
-        let finalScore = new PIXI.Text(scoreCounter, scoreTextStyle);
+        let finalScore = new PIXI.Text("Your score: " + scoreCounter, scoreTextStyle);
         finalScore.x = 300;
-        finalScore.y = 580;
+        finalScore.y = 605;
         finalScore.anchor.x = 0.5;
         return finalScore;
     }
 
-    _createFinalScoreText() {
-        let finalScoreText = new PIXI.Text("Catalans denied!!!", scoreTextStyle);
-        finalScoreText.x = 300;
-        finalScoreText.y = 630;
-        finalScoreText.anchor.x = 0.5;
-        return finalScoreText;
-    }
 
     _createAccuracy() {
         let accuracy = new PIXI.Text("Accuracy: " + Math.ceil(totalHits / totalClicks * 100) + "%", accuracyStyle);
         accuracy.x = 300;
-        accuracy.y = 680;
+        accuracy.y = 665;
         accuracy.anchor.x = 0.5;
         return accuracy;
     }
 
-    _validateHighScore() {
+    _validateHighScore(pixiText) {
         let xhr = new XMLHttpRequest();
-        xhr.open('GET', 'http://localhost:3000/players/0/10');
+        xhr.open('GET', `${HIGH_SCORE_SERVER}/players/0/10`);
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                debugger;
                 let scoreList = JSON.parse(xhr.responseText);
-                let highScore = scoreList[0].score;
-                if (scoreCounter > highScore) {
-                    let name = this._promptForName();
-                    this._storeNewHighScore(name);
-                }
-                else {
-                    this._showHighScore(highScore);
+                if (scoreList.length > 0) {
+                    let highScore = scoreList[0].score;
+                    if (scoreCounter > highScore) {
+                        let name = this._promptForName();
+                        this._storeNewHighScore(name);
+                        this._updateHighScoreText(pixiText, { 'name' : name, 'score' : scoreCounter});
+                    }
+                    else {
+                        this._updateHighScoreText(pixiText, scoreList[0]);
+                    }
                 }
             }
         }
@@ -391,18 +469,27 @@ class Scene {
 
     _promptForName() {
         let name = prompt("Enter your name");
+
         return name;
     }
 
     _storeNewHighScore(name) {
         let xhr = new XMLHttpRequest();
-        let url = `http://localhost:3000/players/${name}/${scoreCounter}`;
+        let url = `${HIGH_SCORE_SERVER}/players/${name}/${scoreCounter}`;
         xhr.open('PUT', url);
         xhr.send();
     }
 
-    _showHighScore(highScore){
-        console.log(highScore);
+    _updateHighScoreText(pixiText, highScore){
+        pixiText.text = `High Score: ${highScore.name}  ${highScore.score}`;
+    }
+
+    _createHighScore(){
+        let highScoreText = new PIXI.Text(" ", scoreTextStyle);
+        highScoreText.x = 300;
+        highScoreText.y = 535;
+        highScoreText.anchor.x = 0.5;
+        return highScoreText;
     }
 
 
@@ -410,27 +497,27 @@ class Scene {
         this._stopScene();
 
         let resetButton = this._createResetButton();
+        let highScoreText = this._createHighScore();
         let finalScore = this._createFinalScore();
-        let finalScoreText = this._createFinalScoreText();
         let accuracy = new PIXI.Text(accuracyStyle);
 
         resetButton.on('pointerdown', () => {
             resetButton.destroy();
+            highScoreText.destroy();
             finalScore.destroy();
-            finalScoreText.destroy();
             accuracy.destroy();
             this._reset()
         });
 
         this.app.stage.addChild(resetButton);
+        this.app.stage.addChild(highScoreText);
         this.app.stage.addChild(finalScore);
-        this.app.stage.addChild(finalScoreText);
 
         if (totalHits + totalClicks > 0) {
             accuracy = this._createAccuracy();
             this.app.stage.addChild(accuracy);
         }
-        this._validateHighScore();
+        this._validateHighScore(highScoreText);
 
     }
 }

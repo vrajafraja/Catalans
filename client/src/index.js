@@ -27,10 +27,13 @@ PIXI.loader
     .add('catalanian', './images/catalanian.png')
     .add('catalanianRH', './images/catalanianRH.png')
     .add('catalanianLH', './images/catalanianLH.png')
+    .add('oldCatalanianRH', './images/oldCatalanianRH.png')
+    .add('oldCatalanianLH', './images/oldCatalanianLH.png')
     .add('car', './images/car.png')
     .add('deadCar1', './images/deadCar1.png')
     .add('deadCar2', './images/deadCar2.png')
     .add('deadCatalanian', './images/deadCatalanian.png')
+    .add('deadOldCatalanian', './images/deadOldCatalanian.png')
     .add('police', './images/police.png')
     .load(function (loader, resources) {
         let scene = new Scene(app, resources);
