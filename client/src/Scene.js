@@ -1,3 +1,5 @@
+import {unregister} from "./registerServiceWorker";
+
 const PIXI = require('pixi.js');
 const HOWL = require('howler');
 
@@ -65,7 +67,7 @@ const carCrashSound = new HOWL.Howl({
 });
 
 const backgroundSound = new HOWL.Howl({
-    src: ['sounds/Vejvar.mp3'],
+    src: ['sounds/vejvar.mp3'],
     volume: 5.0,
     loop: true
 });
@@ -391,11 +393,10 @@ class Scene {
                 drawableCatalanian = this._formatSprite(drawableCatalanian);
                 drawableCatalanian.x = i * offset + Math.sin(iteration) * 50 + 90;
                 let catalanian;
-                if (speed < 1.5){
+                if (speed < 1.5) {
                     catalanian = new OldCatalanian(i * offset + 50, speed, drawableCatalanian, this.resources);
                 }
-                else if (speed < 5)
-                {
+                else if (speed < 5) {
                     catalanian = new Catalanian(i * offset + 50, speed, drawableCatalanian, this.resources);
                 }
                 else {
@@ -451,16 +452,17 @@ class Scene {
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                 let scoreList = JSON.parse(xhr.responseText);
+                let highScore = 0;
                 if (scoreList.length > 0) {
-                    let highScore = scoreList[0].score;
-                    if (scoreCounter > highScore) {
-                        let name = this._promptForName();
-                        this._storeNewHighScore(name);
-                        this._updateHighScoreText(pixiText, { 'name' : name, 'score' : scoreCounter});
-                    }
-                    else {
-                        this._updateHighScoreText(pixiText, scoreList[0]);
-                    }
+                    highScore = scoreList[0].score;
+                }
+                if (scoreCounter > highScore || highScore === 0) {
+                    let name = this._promptForName();
+                    this._storeNewHighScore(name);
+                    this._updateHighScoreText(pixiText, {'name': name, 'score': scoreCounter});
+                }
+                else {
+                    this._updateHighScoreText(pixiText, scoreList[0]);
                 }
             }
         }
@@ -470,7 +472,7 @@ class Scene {
     _promptForName() {
         let name = prompt("Enter your name");
 
-        return name;
+        return name.substr(0, 6);
     }
 
     _storeNewHighScore(name) {
@@ -480,11 +482,13 @@ class Scene {
         xhr.send();
     }
 
-    _updateHighScoreText(pixiText, highScore){
-        pixiText.text = `High Score: ${highScore.name}  ${highScore.score}`;
+    _updateHighScoreText(pixiText, highScore) {
+        if (highScore != undefined) {
+            pixiText.text = `High Score: ${highScore.name}  ${highScore.score}`;
+        }
     }
 
-    _createHighScore(){
+    _createHighScore() {
         let highScoreText = new PIXI.Text(" ", scoreTextStyle);
         highScoreText.x = 300;
         highScoreText.y = 535;
