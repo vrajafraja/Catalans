@@ -160,8 +160,8 @@ class CatalanianInCar extends Catalanian {
     }
 
     _animate() {
-        if (iteration % 10 === 0){
-            if (this.state === DEAD){
+        if (iteration % 10 === 0) {
+            if (this.state === DEAD) {
                 if (this.animation === "deadCar1") {
                     this.animation = "deadCar2";
                     this.sprite.texture = this.textureResources.deadCar2.texture;
@@ -332,18 +332,88 @@ class Scene {
         this.catalanian.click();
     }
 
-    showFinalScore() {
+    _stopScene() {
         this.objects.forEach(object => object.state = DEAD);
+        backgroundSound.stop();
+    }
 
+    _createResetButton() {
         let resetButton = new PIXI.Sprite(this.resources.reset.texture);
-        let finalScore = new PIXI.Text(scoreCounter, scoreTextStyle);
-        let finalScoreText = new PIXI.Text("Catalans denied!!!", scoreTextStyle);
-        let accuracy = new PIXI.Text(accuracyStyle);
-
-
         resetButton = this._formatSprite(resetButton);
         resetButton.x = 300;
         resetButton.y = 300;
+        return resetButton;
+    }
+
+    _createFinalScore() {
+        let finalScore = new PIXI.Text(scoreCounter, scoreTextStyle);
+        finalScore.x = 300;
+        finalScore.y = 580;
+        finalScore.anchor.x = 0.5;
+        return finalScore;
+    }
+
+    _createFinalScoreText() {
+        let finalScoreText = new PIXI.Text("Catalans denied!!!", scoreTextStyle);
+        finalScoreText.x = 300;
+        finalScoreText.y = 630;
+        finalScoreText.anchor.x = 0.5;
+        return finalScoreText;
+    }
+
+    _createAccuracy() {
+        let accuracy = new PIXI.Text("Accuracy: " + Math.ceil(totalHits / totalClicks * 100) + "%", accuracyStyle);
+        accuracy.x = 300;
+        accuracy.y = 680;
+        accuracy.anchor.x = 0.5;
+        return accuracy;
+    }
+
+    _validateHighScore() {
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', 'http://localhost:3000/players/0/10');
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                debugger;
+                let scoreList = JSON.parse(xhr.responseText);
+                let highScore = scoreList[0].score;
+                if (scoreCounter > highScore) {
+                    let name = this._promptForName();
+                    this._storeNewHighScore(name);
+                }
+                else {
+                    this._showHighScore(highScore);
+                }
+            }
+        }
+        xhr.send();
+    }
+
+    _promptForName() {
+        let name = prompt("Enter your name");
+        return name;
+    }
+
+    _storeNewHighScore(name) {
+        let xhr = new XMLHttpRequest();
+        let url = `http://localhost:3000/players/${name}/${scoreCounter}`;
+        xhr.open('PUT', url);
+        xhr.send();
+    }
+
+    _showHighScore(highScore){
+        console.log(highScore);
+    }
+
+
+    showFinalScore() {
+        this._stopScene();
+
+        let resetButton = this._createResetButton();
+        let finalScore = this._createFinalScore();
+        let finalScoreText = this._createFinalScoreText();
+        let accuracy = new PIXI.Text(accuracyStyle);
+
         resetButton.on('pointerdown', () => {
             resetButton.destroy();
             finalScore.destroy();
@@ -352,27 +422,16 @@ class Scene {
             this._reset()
         });
 
-        finalScore.x = 300;
-        finalScore.y = 580;
-        finalScore.anchor.x = 0.5;
-        finalScoreText.x = 300;
-        finalScoreText.y = 630;
-        finalScoreText.anchor.x = 0.5;
-
-
         this.app.stage.addChild(resetButton);
         this.app.stage.addChild(finalScore);
         this.app.stage.addChild(finalScoreText);
 
         if (totalHits + totalClicks > 0) {
-            accuracy = new PIXI.Text("Accuracy: " + Math.ceil(totalHits / totalClicks * 100) + "%", accuracyStyle);
-            accuracy.x = 300;
-            accuracy.y = 680;
-            accuracy.anchor.x = 0.5;
+            accuracy = this._createAccuracy();
             this.app.stage.addChild(accuracy);
         }
+        this._validateHighScore();
 
-        backgroundSound.stop();
     }
 }
 
