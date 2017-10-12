@@ -23,11 +23,6 @@ class Player {
     }
 }
 
-/* GET home page. */
-router.get("/", function (req, res, next) {
-    res.render("index", {title: "Express"});
-});
-
 router.get("/players/:start/:end", function (req, res, next) {
     res.json(players.slice(req.params.start, req.params.end));
 });
