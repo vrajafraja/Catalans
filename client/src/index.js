@@ -15,6 +15,7 @@ registerServiceWorker();
 var app = new PIXI.Application(600, 800);
 // The application will create a canvas element for you that you
 // can then insert into the DOM.
+app.view.id = "app";
 document.body.appendChild(app.view);
 
 
