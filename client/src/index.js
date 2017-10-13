@@ -23,7 +23,7 @@ let initializeApp = () => {
         document.body.removeChild(app.view);
         app.destroy();
         app = new PIXI.Application(600, 800);
-        document.body.appendChild(app.view);
+        document.body.insertBefore(app.view, document.body.childNodes.item(2));
         app.view.id = "app";
         PIXI.loader.reset();
     }
