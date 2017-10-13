@@ -292,7 +292,7 @@ class CatalanianInCar extends Catalanian {
 
 }
 
-class Scene {
+class FallingEnemy {
     constructor(app, resources) {
         this.objects = [];
 
@@ -526,4 +526,4 @@ class Scene {
     }
 }
 
-export default Scene;
+export default Drive;
