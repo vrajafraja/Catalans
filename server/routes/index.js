@@ -29,7 +29,7 @@ router.get("/players/:start/:end", function (req, res, next) {
 
 router.put("/players/:name/:score", function (req, res, next) {
     players.push(new Player(String(req.params.name), parseInt(req.params.score), Date.now()));
-    players.sort((p1, p2) => p1.score < p2.score);
+    players.sort((p1, p2) => p2.score - p1.score);
     players.length = Math.min(players.length, 100);
     fs.writeFile(fileName, JSON.stringify(players), err => console.log(err || `File '${fileName}' was written.`));
     res.json(true);
