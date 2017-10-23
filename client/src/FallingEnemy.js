@@ -300,6 +300,7 @@ class FallingEnemy {
         this.resources = resources;
         this.generateInterval = 200;
         this.generateDensity = 0.1;
+        this._resetCounters();
 
         score = new PIXI.Text(0, scoreTextStyle);
         score.x = 30;
@@ -315,19 +316,23 @@ class FallingEnemy {
         backgroundSound.play();
     }
 
+    _resetCounters(){
+        iteration = 0;
+        this.generateInterval = 200;
+        this.generateDensity = 0.1;
+        totalHits = 0;
+        totalClicks = 0;
+        scoreCounter = 0;
+    }
+
     _reset() {
         this.objects.forEach(object => {
             object.sprite.destroy();
         });
 
-        this.objects = [];
-        iteration = 0;
-        this.generateInterval = 150;
-        this.generateDensity = 0.1;
-        totalHits = 0;
-        totalClicks = 0;
         score.text = 0;
-        scoreCounter = 0;
+        this.objects = [];
+        this._resetCounters();
 
         backgroundSound.play();
         this.app.ticker.add(this.moveFunction);
