@@ -1,5 +1,3 @@
-import {unregister} from "./registerServiceWorker";
-
 const PIXI = require('pixi.js');
 const HOWL = require('howler');
 
